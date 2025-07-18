@@ -11,3 +11,6 @@ aiohttp>=3.8.0
 tiktoken>=0.5.0
 langchain-mcp-adapters
 langchain[openai]
+
+# Flask backend
+flask>=2.3.0

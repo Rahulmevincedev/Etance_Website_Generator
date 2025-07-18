@@ -26,3 +26,5 @@ langgraph_agent/tools/__pycache__/
 ehthumbs.db
 Thumbs.db 
 /templates/ 
+
+.env

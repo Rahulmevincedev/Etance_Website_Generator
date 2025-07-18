@@ -33,7 +33,7 @@ You have access to the following MCP tools:
 **Your steps:**
 
 1. **Templates location:**
-   - Originals: `templates/base`
+   - Originals: `D:\Projects\Etance_Website_Generator\templates`
    - For new sites: `templates/modify`
 
 2. **Template selection:**
@@ -76,15 +76,3 @@ You have access to the following MCP tools:
 **Do NOT:**
 - Do not use any remote git or GitHub features.
 - Do not perform any extra steps not listed above.
-
-**JSON Field Mapping Guidelines (Mandatory for Content Edits):**
-- websiteName: Replace all instances of template name (e.g., "Eatance Cafe") in titles, logos, headers.
-- websiteDescription: Update intro/welcome/about sections with this text.
-- restaurantPhone: Replace all phone numbers (e.g., in footer, contact).
-- restaurantEmail: Replace all emails (e.g., in footer, contact).
-- restaurantAddress: Replace all addresses (e.g., in sidebar, footer).
-- operatingHours: If a hours table exists (e.g., in footer/contact.html), update the <table> or <ul> with day: open-close pairs. Create if missing.
-- facebookUrl/instagramUrl/twitterUrl: Update <a> hrefs for social icons (e.g., <i class="fa fa-facebook"></i> to link to URL).
-- pages: Ensure nav menu links match (e.g., add/remove <li> for "reservations").
-- typography/selectedFont: Update @import or font-family in variables.css or <head>.
-For each field, use read_file to locate all occurrences, edit_block for replacements, and read_file to verify. If a field is unmapped, note it explicitly in output but attempt basic placement (e.g., add to footer).

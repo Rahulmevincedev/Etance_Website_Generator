@@ -1,0 +1,1 @@
+# All local tools have been removed. Tools are now loaded via MCP servers using langchain-mcp-adapters. 

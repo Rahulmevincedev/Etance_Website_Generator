@@ -1,0 +1,28 @@
+# Common development files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursorrules
+
+# Python cache
+langgraph_agent/__pycache__/
+langgraph_agent/tools/__pycache__/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 
+/templates/ 

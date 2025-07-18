@@ -1,0 +1,19 @@
+{
+    "mcpServers": {
+      "sequentialthinking": {
+        "command": "node",
+        "args": [
+          "C:\\Users\\dell\\AppData\\Roaming\\npm\\node_modules\\@modelcontextprotocol\\server-sequential-thinking\\dist\\index.js"
+        ],
+        "transport": "stdio"
+      },
+      "desktopcommander": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@wonderwhy-er/desktop-commander@latest"
+        ],
+        "transport": "stdio"
+      }
+    }
+  }

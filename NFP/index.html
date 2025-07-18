@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eatance Website Generator - NFP</title>
+    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Lato:wght@300;400;700&family=Poppins:wght@300;400;500;600;700&family=Oswald:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&family=Nunito:wght@300;400;600;700&family=Quicksand:wght@300;400;500;700&family=Lora:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Pacifico&family=Satisfy&family=Great+Vibes&family=Bebas+Neue&family=Righteous&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="https://eatanceapp.com/wp-content/uploads/2022/02/favicon-32x32-1.png">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <img src="Eatance_Logo.svg" alt="Eatance Logo" class="logo-img" width="300" height="48">
+                <div class="titles">
+                    <i class="fas fa-utensils"></i>
+                    <h1><span>Restaurant</span> Website Generator</h1>
+                </div>
+            </div>
+            <p class="subtitle">Create beautiful restaurant websites with AI-powered customization</p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <span>Type</span>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <span>Content</span>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <span>Design</span>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-number">4</div>
+                    <span>Generate</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wizard Form -->
+        <form id="websiteWizard" class="wizard">
+            <!-- Step 1: Website Type -->
+            <div class="step-content active" id="step1">
+                <div class="step-header">
+                    <h2>Let's start with your restaurant basics</h2>
+                    <p>Enter your restaurant information to get started</p>
+                </div>
+
+                <!-- Restaurant Basic Info -->
+                <div class="website-info">
+                    <div class="info-row">
+                        <div class="info-group">
+                            <label for="websiteName">Restaurant Name <span class="required-star">*</span></label>
+                            <input type="text" id="websiteName" name="websiteName"
+                                placeholder="Enter your restaurant name" required>
+                        </div>
+
+                        <div class="info-group">
+                            <label for="websiteLogo">Restaurant Logo</label>
+                            <div class="logo-upload">
+                                <input type="file" id="websiteLogo" name="websiteLogo" accept="image/*">
+                                <div class="logo-preview" id="logoPreview">
+                                    <div class="logo-placeholder">
+                                        <i class="fas fa-camera"></i>
+                                        <span>Upload Logo</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <label for="websiteDescription">Restaurant Description</label>
+                        <textarea id="websiteDescription" name="websiteDescription"
+                            placeholder="Describe your restaurant, cuisine type, atmosphere, and what makes it special..."
+                            rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="step-divider">
+                    <h3>Restaurant Contact Information</h3>
+                </div>
+
+                <!-- Restaurant Contact Details -->
+                <div class="contact-info">
+                    <div class="contact-row">
+                        <div class="info-group">
+                            <label for="restaurantPhone">Phone Number <span class="required-star">*</span></label>
+                            <input type="tel" id="restaurantPhone" name="restaurantPhone" placeholder="(555) 123-4567"
+                                required>
+                        </div>
+
+                        <div class="info-group">
+                            <label for="restaurantEmail">Email Address <span class="required-star">*</span></label>
+                            <input type="email" id="restaurantEmail" name="restaurantEmail"
+                                placeholder="info@restaurant.com" required>
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <label for="restaurantAddress">Full Address <span class="required-star">*</span></label>
+                        <textarea id="restaurantAddress" name="restaurantAddress"
+                            placeholder="123 Main Street, City, State 12345" rows="2" required></textarea>
+                    </div>
+
+                    <div class="operating-hours-section">
+                        <h4>Operating Hours</h4>
+                        <div class="hours-container">
+                            <div class="day-hours" data-day="monday">
+                                <div class="day-label">
+                                    <input type="checkbox" id="monday" checked>
+                                    <label for="monday">Monday</label>
+                                </div>
+                                <div class="time-inputs">
+                                    <input type="time" id="monday-open" value="09:00">
+                                    <span>to</span>
+                                    <input type="time" id="monday-close" value="22:00">
+                                </div>
+                            </div>
+
+                            <div class="day-hours" data-day="tuesday">
+                                <div class="day-label">
+                                    <input type="checkbox" id="tuesday" checked>
+                                    <label for="tuesday">Tuesday</label>
+                                </div>
+                                <div class="time-inputs">
+                                    <input type="time" id="tuesday-open" value="09:00">
+                                    <span>to</span>
+                                    <input type="time" id="tuesday-close" value="22:00">
+                                </div>
+                            </div>
+
+                            <div class="day-hours" data-day="wednesday">
+                                <div class="day-label">
+                                    <input type="checkbox" id="wednesday" checked>
+                                    <label for="wednesday">Wednesday</label>
+                                </div>
+                                <div class="time-inputs">
+                                    <input type="time" id="wednesday-open" value="09:00">
+                                    <span>to</span>
+                                    <input type="time" id="wednesday-close" value="22:00">
+                                </div>
+                            </div>
+
+                            <div class="day-hours" data-day="thursday">
+                                <div class="day-label">
+                                    <input type="checkbox" id="thursday" checked>
+                                    <label for="thursday">Thursday</label>
+                                </div>
+                                <div class="time-inputs">
+                                    <input type="time" id="thursday-open" value="09:00">
+                                    <span>to</span>
+                                    <input type="time" id="thursday-close" value="22:00">
+                                </div>
+                            </div>
+
+                            <div class="day-hours" data-day="friday">
+                                <div class="day-label">
+                                    <input type="checkbox" id="friday" checked>
+                                    <label for="friday">Friday</label>
+                                </div>
+                                <div class="time-inputs">
+                                    <input type="time" id="friday-open" value="09:00">
+                                    <span>to</span>
+                                    <input type="time" id="friday-close" value="23:00">
+                                </div>
+                            </div>
+
+                            <div class="day-hours" data-day="saturday">
+                                <div class="day-label">
+                                    <input type="checkbox" id="saturday" checked>
+                                    <label for="saturday">Saturday</label>
+                                </div>
+                                <div class="time-inputs">
+                                    <input type="time" id="saturday-open" value="09:00">
+                                    <span>to</span>
+                                    <input type="time" id="saturday-close" value="23:00">
+                                </div>
+                            </div>
+
+                            <div class="day-hours" data-day="sunday">
+                                <div class="day-label">
+                                    <input type="checkbox" id="sunday" checked>
+                                    <label for="sunday">Sunday</label>
+                                </div>
+                                <div class="time-inputs">
+                                    <input type="time" id="sunday-open" value="10:00">
+                                    <span>to</span>
+                                    <input type="time" id="sunday-close" value="21:00">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hours-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Note: Unchecked days are considered holidays or closed days. Operating hours will not
+                                be displayed for these days on your website.</span>
+                        </div>
+
+                        <div class="hours-actions">
+                            <!-- <button type="button" class="hours-btn" id="copyHoursBtn">
+                                <i class="fas fa-copy"></i>
+                                Copy to All Days
+                            </button> -->
+                            <button type="button" class="hours-btn" id="resetHoursBtn">
+                                <i class="fas fa-undo"></i>
+                                Reset Default
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="social-media-section">
+                        <h4>Social Media Links (Optional)</h4>
+                        <div class="social-links">
+                            <div class="social-input">
+                                <i class="fab fa-facebook"></i>
+                                <input type="url" id="facebookUrl" name="facebookUrl" placeholder="Facebook page URL">
+                            </div>
+                            <div class="social-input">
+                                <i class="fab fa-instagram"></i>
+                                <input type="url" id="instagramUrl" name="instagramUrl"
+                                    placeholder="Instagram profile URL">
+                            </div>
+                            <div class="social-input">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" height="18">
+                                    <path
+                                        d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z">
+                                    </path>
+                                </svg>
+                                <input type="url" id="twitterUrl" name="twitterUrl" placeholder="X profile URL">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Restaurant Pages -->
+            <div class="step-content" id="step2">
+                <div class="step-header">
+                    <h2>What pages do you need for your restaurant?</h2>
+                    <p>Select the pages you want to include in your restaurant website</p>
+                </div>
+
+                <div class="content-selection">
+                    <div class="page-group">
+                        <h3>Essential Pages</h3>
+                        <div class="page-options">
+                            <label class="page-option">
+                                <input type="checkbox" name="pages" value="home" checked disabled>
+                                <span class="checkmark"></span>
+                                <div class="page-info">
+                                    <strong>Homepage</strong>
+                                    <small>Main landing page (Required)</small>
+                                </div>
+                            </label>
+
+
+                            <label class="page-option">
+                                <input type="checkbox" name="pages" value="about" checked>
+                                <span class="checkmark"></span>
+                                <div class="page-info">
+                                    <strong>About Us</strong>
+                                    <small>Tell your restaurant's story and history</small>
+                                </div>
+                            </label>
+
+                            <label class="page-option">
+                                <input type="checkbox" name="pages" value="contact" checked>
+                                <span class="checkmark"></span>
+                                <div class="page-info">
+                                    <strong>Contact & Location</strong>
+                                    <small>Contact info, address, and map</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Menu & Dining Section (Commented out)
+                    <div class="page-group">
+                        <h3>Menu & Dining</h3>
+                        <div class="page-options">
+                            <label class="page-option">
+                                <input type="checkbox" name="pages" value="drinks-menu">
+                                <span class="checkmark"></span>
+                                <div class="page-info">
+                                    <strong>Drinks & Wine List</strong>
+                                    <small>Beverages, cocktails, and wine selection</small>
+                                </div>
+                            </label>
+
+                            <label class="page-option">
+                                <input type="checkbox" name="pages" value="dessert-menu">
+                                <span class="checkmark"></span>
+                                <div class="page-info">
+                                    <strong>Dessert Menu</strong>
+                                    <small>Sweet treats and after-dinner options</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    -->
+
+
+
+                    <div class="page-group">
+                        <h3>Business & Support</h3>
+                        <div class="page-options">
+
+                            <label class="page-option">
+                                <input type="checkbox" name="pages" value="terms" checked>
+                                <span class="checkmark"></span>
+                                <div class="page-info">
+                                    <strong>Terms & Conditions</strong>
+                                    <small>Terms of service and usage policies</small>
+                                </div>
+                            </label>
+
+                            <label class="page-option">
+                                <input type="checkbox" name="pages" value="privacy" checked>
+                                <span class="checkmark"></span>
+                                <div class="page-info">
+                                    <strong>Privacy Policy</strong>
+                                    <small>Data protection and privacy policies</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Design & Colors -->
+            <div class="step-content" id="step3">
+                <div class="step-header">
+                    <h2>Choose your design preferences</h2>
+                    <p>Customize the look and feel of your website</p>
+                </div>
+
+                <div class="design-options">
+                    <div class="design-group">
+                        <h3>Color Scheme</h3>
+                        <div class="color-picker-section">
+                            <div class="color-picker-group">
+                                <label for="primaryColor">Primary Color</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="primaryColor" name="primaryColor" value="#3B82F6">
+                                    <span class="color-label">Main brand color</span>
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label for="secondaryColor">Secondary Color</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="secondaryColor" name="secondaryColor" value="#1E40AF">
+                                    <span class="color-label">Accent and highlights</span>
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label for="accentColor">Accent Color</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="accentColor" name="accentColor" value="#60A5FA">
+                                    <span class="color-label">Buttons and links</span>
+                                </div>
+                            </div>
+
+                            <div class="color-preview-live">
+                                <h4>Color Preview</h4>
+                                <div class="preview-card">
+                                    <div class="preview-header" id="previewHeader">Header</div>
+                                    <div class="preview-content">
+                                        <div class="preview-text">Sample text content</div>
+                                        <button class="preview-button" id="previewButton">Sample Button</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="design-group">
+                        <h3>Typography</h3>
+                        <div class="typography-selection">
+                            <div class="typography-dropdown">
+                                <div id="customFontDropdown"></div>
+                            </div>
+                            <div class="typography-preview" id="typographyPreview">
+                                <div class="font-preview">
+                                    <div class="font-title">The quick brown fox</div>
+                                    <div class="font-text">Lorem ipsum dolor sit amet consectetur</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout Section - Commented out for future use
+                    <div class="design-group">
+                        <h3>Layout Style</h3>
+                        <div class="layout-options">
+                            <div class="layout-option" data-layout="minimal">
+                                <div class="layout-preview">
+                                    <div class="layout-header"></div>
+                                    <div class="layout-content">
+                                        <div class="layout-text"></div>
+                                        <div class="layout-text short"></div>
+                                    </div>
+                                </div>
+                                <span>Minimal</span>
+                            </div>
+
+                            <div class="layout-option" data-layout="modern">
+                                <div class="layout-preview">
+                                    <div class="layout-sidebar"></div>
+                                    <div class="layout-main">
+                                        <div class="layout-header"></div>
+                                        <div class="layout-content">
+                                            <div class="layout-text"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span>Modern</span>
+                            </div>
+
+                            <div class="layout-option" data-layout="classic">
+                                <div class="layout-preview">
+                                    <div class="layout-nav"></div>
+                                    <div class="layout-hero"></div>
+                                    <div class="layout-columns">
+                                        <div class="layout-col"></div>
+                                        <div class="layout-col"></div>
+                                    </div>
+                                </div>
+                                <span>Classic</span>
+                            </div>
+                        </div>
+                    </div>
+                    -->
+                </div>
+            </div>
+
+            <!-- Step 4: Review & Generate -->
+            <div class="step-content" id="step4">
+                <div class="step-header">
+                    <h2>Review your restaurant website</h2>
+                    <p>Check your selections and generate your AI-powered restaurant website</p>
+                </div>
+
+                <div class="review-section">
+                    <div class="review-card">
+                        <h3><i class="fas fa-utensils"></i> Restaurant Info</h3>
+                        <div id="reviewName" class="review-content"></div>
+                    </div>
+
+                    <div class="review-card">
+                        <h3><i class="fas fa-phone"></i> Contact Details</h3>
+                        <div id="reviewContact" class="review-content"></div>
+                    </div>
+
+                    <div class="review-card">
+                        <h3><i class="fas fa-file-alt"></i> Selected Pages</h3>
+                        <div id="reviewPages" class="review-content"></div>
+                    </div>
+
+                    <div class="review-card">
+                        <h3><i class="fas fa-palette"></i> Design</h3>
+                        <div id="reviewDesign" class="review-content"></div>
+                    </div>
+                </div>
+
+                <div class="generation-section">
+                    <div class="site-preview">
+                        <h3>Your restaurant website will be generated with these features:</h3>
+                        <div class="preview-info">
+                            <div class="info-item">
+                                <i class="fas fa-utensils"></i>
+                                <span>Restaurant-Optimized Design</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Mobile-Friendly Layout</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Fast Loading Performance</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-search"></i>
+                                <span>SEO Optimized for Restaurants</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="generateBtn" class="generate-btn">
+                        <i class="fas fa-magic"></i>
+                        Generate AI Restaurant Website
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <div class="nav-left">
+                    <button type="button" id="prevBtn" class="nav-btn secondary" disabled>
+                        <i class="fas fa-arrow-left"></i>
+                        Previous
+                    </button>
+                </div>
+                <div class="nav-right">
+                    <div id="requiredFieldsMsg" class="highlight-required-message" style="display:none;"><i
+                            class="fas fa-exclamation-circle"></i> Please fill all required (<span
+                            class="required-star">*</span>) fields.</div>
+                    <button type="button" id="nextBtn" class="nav-btn primary">
+                        Next
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Generation Modal -->
+        <div id="generationModal" class="modal">
+            <div class="modal-content">
+                <div class="generation-progress">
+                    <div class="generation-icon">
+                        <i class="fas fa-cog fa-spin"></i>
+                    </div>
+                    <h3>Generating Your Website...</h3>
+                    <div class="progress-steps-modal">
+                        <div class="progress-step">
+                            <i class="fas fa-check"></i>
+                            <span>Initializing Hugo project</span>
+                        </div>
+                        <div class="progress-step">
+                            <i class="fas fa-cog fa-spin"></i>
+                            <span>Configuring theme and settings</span>
+                        </div>
+                        <div class="progress-step">
+                            <i class="fas fa-clock"></i>
+                            <span>Creating pages and content</span>
+                        </div>
+                        <div class="progress-step">
+                            <i class="fas fa-clock"></i>
+                            <span>Applying design customizations</span>
+                        </div>
+                        <div class="progress-step">
+                            <i class="fas fa-clock"></i>
+                            <span>Building static site</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div class="modal" id="successModal">
+            <div class="modal-content success-modal">
+                <div class="website-preview">
+                    <div class="preview-header">
+                        <div class="preview-controls">
+                            <div class="preview-url">
+                                <i class="fas fa-globe"></i>
+                                <span id="previewUrl">your-restaurant.com</span>
+                            </div>
+                            <div class="preview-actions">
+                                <button class="preview-btn" id="openFullPreview" title="Open in new tab">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </button>
+                                <button class="preview-btn" id="refreshPreview" title="Refresh preview">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-frame-container">
+                        <iframe id="websitePreview" src="../nina-vista-restaurant/public/index.html" frameborder="0"
+                            title="Website Preview" scrolling="yes">
+                        </iframe>
+                        <div class="preview-loading" id="previewLoading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading your website preview...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-actions">
+                    <button class="action-btn primary" id="downloadBtn">
+                        <i class="fas fa-download"></i>
+                        Download Files
+                    </button>
+
+                    <button class="action-btn secondary" id="newProjectBtn">
+                        <i class="fas fa-plus"></i>
+                        Create New
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

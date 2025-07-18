@@ -236,3 +236,22 @@ For support, please:
 2. Review the code examples
 3. Open an issue on GitHub
 4. Check LangSmith traces for debugging (LangGraph agent)
+
+## 📧 Email Feature Setup (Gmail)
+
+To enable the website generator to send generated site files via email, you must set the following environment variables with your Gmail credentials:
+
+```bash
+export GMAIL_USER="your-gmail-address@gmail.com"
+export GMAIL_APP_PASSWORD="your-gmail-app-password"
+```
+
+- **GMAIL_USER**: Your Gmail address (e.g., myname@gmail.com)
+- **GMAIL_APP_PASSWORD**: An [App Password](https://support.google.com/accounts/answer/185833) generated from your Google Account (not your regular Gmail password)
+
+**Note:**
+
+- You must enable 2-Step Verification on your Google account to generate an App Password.
+- Never share your app password or commit it to version control.
+
+The backend will use these credentials to send the generated website as a zip file to the user's email address.

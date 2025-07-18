@@ -4,6 +4,7 @@ class WebsiteWizard {
     constructor() {
         this.currentStep = 1;
         this.totalSteps = 4;
+        this.outputPath = '';
         this.formData = {
             websiteName: '',
             websiteDescription: '',
@@ -57,13 +58,6 @@ class WebsiteWizard {
 
         // Initialize form data
         this.updateFormData();
-
-        /* Menu & Dining section initialization - Commented out
-        const foodMenuCheckbox = document.querySelector('input[name="pages"][value="menu"]');
-        if (foodMenuCheckbox) {
-            this.toggleMenuAndDining(foodMenuCheckbox.checked);
-        }
-        */
     }
 
     bindEvents() {
@@ -131,11 +125,6 @@ class WebsiteWizard {
         // Page checkboxes
         document.addEventListener('change', (e) => {
             if (e.target.name === 'pages') {
-                /* Menu & Dining checkbox handler - Commented out
-                if (e.target.value === 'menu') {
-                    this.toggleMenuAndDining(e.target.checked);
-                }
-                */
                 this.updateFormData();
                 this.validateCurrentStep();
             }
@@ -164,11 +153,6 @@ class WebsiteWizard {
         document.querySelectorAll('.typography-option').forEach(option => {
             option.addEventListener('click', () => this.selectTypography(option));
         });
-
-        // Layout options - Commented out for future use
-        // document.querySelectorAll('.layout-option').forEach(option => {
-        //     option.addEventListener('click', () => this.selectLayout(option));
-        // });
 
         // Modal close buttons
         document.getElementById('openFullPreview').addEventListener('click', () => this.openFullPreview());
@@ -929,24 +913,44 @@ class WebsiteWizard {
     }
 
     async generateWebsite() {
-        /* if (!this.isFormComplete()) {
-            alert('Please complete all steps before generating your website.');
-            return;
-        } */
+        const generateBtn = document.getElementById('generateBtn');
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-cog fa-spin"></i> Generating...';
 
         // Show generation modal
         const modal = document.getElementById('generationModal');
         modal.classList.add('active');
 
-        // Simulate generation process
+        // Simulate generation process in the modal
         await this.simulateGeneration();
 
-        // Hide generation modal and show success modal with preview
-        modal.classList.remove('active');
+        try {
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.formData),
+            });
 
-        setTimeout(() => {
-            this.showSuccessWithPreview();
-        }, 500);
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                this.outputPath = result.output_path; // Store the output path
+                modal.classList.remove('active');
+                this.showSuccessWithPreview();
+            } else {
+                alert(`Error generating website: ${result.message}`);
+                modal.classList.remove('active');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while generating the website.');
+            modal.classList.remove('active');
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate AI Restaurant Website';
+        }
     }
 
     showSuccessWithPreview() {
@@ -1092,7 +1096,7 @@ class WebsiteWizard {
     <link rel="stylesheet" href="/NFP2/Cafe/assets/css/cafe3.css" />
     <link rel="stylesheet" href="/NFP2/Cafe/assets/css/style-demo.css" />
     ${googleFontLink}
-    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
       body, html {
@@ -1523,16 +1527,53 @@ class WebsiteWizard {
         this.closeModal('successModal');
     }
 
-    downloadFiles() {
-        // Simulate file download
-        const link = document.createElement('a');
-        link.href = '#';
-        link.download = `${this.formData.websiteType}-website.zip`;
-        link.click();
+    async downloadFiles() {
+        const emailModal = document.getElementById('emailModal');
+        emailModal.classList.add('active');
 
-        // Show download notification
-        alert('Your website files are being prepared for download. This is a demonstration - in a real application, your Hugo site files would be downloaded.');
-        this.closeModal('successModal');
+        document.getElementById('sendEmailBtn').onclick = async () => {
+            const email = document.getElementById('userEmail').value;
+            if (!this.validateEmail(document.getElementById('userEmail'))) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            const sendBtn = document.getElementById('sendEmailBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            try {
+                const response = await fetch('/api/send-zip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        output_path: this.outputPath
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert('Email sent successfully!');
+                    emailModal.classList.remove('active');
+                } else {
+                    alert(`Error sending email: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while sending the email.');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'Send Email';
+            }
+        };
+
+        document.getElementById('cancelEmailBtn').onclick = () => {
+            emailModal.classList.remove('active');
+        };
     }
 
     startNewProject() {
@@ -1638,40 +1679,6 @@ class WebsiteWizard {
             icon.className = 'fas fa-check';
         }
     }
-
-    /* Menu & Dining toggle functionality - Commented out
-    toggleMenuAndDining(show) {
-        // Find the Menu & Dining section by looking for the heading text
-        const menuDiningSections = Array.from(document.querySelectorAll('.page-group h3'));
-        const menuDiningSection = menuDiningSections.find(h3 => h3.textContent.trim() === 'Menu & Dining')?.closest('.page-group');
-
-        if (!menuDiningSection) return;
-
-        // Toggle visibility with transition
-        if (show) {
-            menuDiningSection.style.display = 'block';
-            // Give the browser a moment to process the display change before adding opacity
-            setTimeout(() => {
-                menuDiningSection.style.opacity = '1';
-            }, 10);
-        } else {
-            menuDiningSection.style.opacity = '0';
-            // Wait for transition before hiding
-            setTimeout(() => {
-                menuDiningSection.style.display = 'none';
-            }, 300); // Match this with CSS transition duration
-
-            // Uncheck all checkboxes in the Menu & Dining section
-            menuDiningSection.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            // Update formData to remove these pages
-            this.formData.pages = this.formData.pages.filter(page =>
-                !['drinks-menu', 'dessert-menu', 'specials'].includes(page)
-            );
-        }
-    }
-    */
 
     setupFontSelector() {
         const wizard = this; // Fix context for inner functions
@@ -1963,4 +1970,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Export for potential external use
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = WebsiteWizard;
-} 
+}

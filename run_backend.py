@@ -8,12 +8,9 @@ from flask import Flask, request, jsonify, send_from_directory, send_file
 from dotenv import load_dotenv
 from langgraph_agent.core import LangGraphAgent
 
-# Load environment variables from .env file
 load_dotenv()
-
 app = Flask(__name__, static_folder='NFP', static_url_path='')
 
-# --- Agent and Asyncio Handling ---
 agent = None
 try:
     loop = asyncio.get_running_loop()
@@ -22,40 +19,33 @@ except RuntimeError:
     asyncio.set_event_loop(loop)
 
 def initialize_agent():
-    """Initializes the LangGraphAgent with configuration from environment variables."""
     global agent
     if agent is None:
         print("Initializing LangGraph Agent...")
-        # Get agent configuration from environment variables, with defaults
-        model = os.getenv("AGENT_MODEL", "gpt-3.5-turbo")
-        temperature = float(os.getenv("AGENT_TEMPERATURE", 0.7))
-        max_iterations = int(os.getenv("AGENT_MAX_ITERATIONS", 10))
-
+        model = os.getenv("AGENT_MODEL", "gpt-4o-mini")
+        temperature = float(os.getenv("AGENT_TEMPERATURE", 0.5))
+        max_iterations = int(os.getenv("AGENT_MAX_ITERATIONS", 100))
         print(f"Agent Config: Model={model}, Temp={temperature}, Max Iterations={max_iterations}")
-        
         agent = loop.run_until_complete(LangGraphAgent.ainit(
-            model=model,
-            temperature=temperature,
-            max_iterations=max_iterations
+            model=model, temperature=temperature, max_iterations=max_iterations
         ))
         print("Agent Initialized.")
 
 @app.route('/')
 def index():
-    """Serves the main index.html file."""
     return send_from_directory('NFP', 'index.html')
 
 @app.route('/api/generate', methods=['POST'])
 def generate_site():
-    """Receives data from the frontend and uses the agent to generate the website."""
     data = request.get_json()
     if not data:
         return jsonify({'status': 'error', 'message': 'No JSON data received.'}), 400
 
     try:
-        user_input_json = json.dumps(data, indent=2)
-        print("Received data for agent:", user_input_json)
-        
+        # Minify JSON to a single line for efficiency
+        user_input_json = json.dumps(data)
+        print("Sending minified JSON to agent...")
+
         result = loop.run_until_complete(
             agent.process_request(
                 user_input=user_input_json,
@@ -66,22 +56,21 @@ def generate_site():
         )
 
         if not result.get('success'):
-            print("Agent failed:", result)
             return jsonify({
                 'status': 'error',
                 'message': result.get('response', 'Agent failed to process the request.'),
-                'details': result
             }), 500
 
-        generated_path = result.get('response')
+        # The agent's response should now be ONLY the path. Clean it just in case.
+        generated_path = result.get('response').strip().replace('`', '').replace("'", "")
         print(f"Agent returned path: {generated_path}")
-        
-        if not generated_path or not os.path.isdir(generated_path):
+
+        if not os.path.isdir(generated_path):
              return jsonify({
                 'status': 'error',
-                'message': f"Agent did not return a valid directory path. Agent response: {generated_path}",
+                'message': f"Agent did not return a valid directory path. Raw response: '{generated_path}'",
              }), 500
-        
+
         return jsonify({
             'status': 'success',
             'message': 'Website generated successfully!',
@@ -151,11 +140,9 @@ def send_zip():
     except Exception as e:
         app.logger.error(f"Error in /api/send-zip: {e}", exc_info=True)
         return jsonify({'status': 'error', 'message': str(e)}), 500
-        
-# --- Serve Generated Site Statically ---
+
 @app.route('/Generator/<path:path>')
 def serve_generated_site(path):
-    """Serves files from the Generator directory for previews."""
     return send_from_directory('Generator', path)
 
 if __name__ == '__main__':

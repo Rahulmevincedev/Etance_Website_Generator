@@ -87,7 +87,8 @@ class WebsiteWizard {
         modal.classList.add('active');
 
         try {
-            this.updateOperatingHours(); // Ensure latest hours are captured
+            // Ensure operating hours are up-to-date before sending
+            this.updateOperatingHours();
 
             const response = await fetch('/api/generate', {
                 method: 'POST',
@@ -99,10 +100,11 @@ class WebsiteWizard {
             modal.classList.remove('active');
 
             if (response.ok && result.status === 'success') {
-                this.outputPath = result.output_path;
+                this.outputPath = result.output_path; // Store the real path from the backend
                 this.showSuccessWithPreview();
             } else {
-                alert(`Error: ${result.message || 'An unknown server error occurred.'}`);
+                // Display the actual error message from the backend
+                alert(`Error: ${result.message || 'An unknown error occurred while generating the website.'}`);
             }
 
         } catch (error) {
@@ -123,8 +125,9 @@ class WebsiteWizard {
         const iframe = document.getElementById('websitePreview');
         const previewLoading = document.getElementById('previewLoading');
 
-        // Construct the correct preview path using the backend response
+        // Construct the correct preview path based on the backend response
         const siteFolderName = this.outputPath.split(/\/|\\/).pop();
+        // CORRECTED PATH: Points to the new static route in Flask
         const previewPath = `/Generator/${siteFolderName}/index.html`;
 
         iframe.src = previewPath;

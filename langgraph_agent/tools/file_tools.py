@@ -1,19 +1,15 @@
 """
-Custom LangGraph Tools for Reliable File Editing
-This module provides robust file editing tools that handle HTML content properly,
-replacing the unreliable desktop-commander edit_block tool.
+File Tools for LangGraph Agent
+Provides reliable file reading, writing, and text replacement tools
 """
 
-import os
 import re
-import shutil
-import subprocess
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from difflib import SequenceMatcher
 
 from langchain_core.tools import tool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class FileEditResult(BaseModel):
@@ -216,178 +212,9 @@ def smart_text_replace(
         )
 
 
-@tool
-def copy_directory(source_path: str, dest_path: str, overwrite: bool = True) -> FileEditResult:
-    """
-    Copy a directory and all its contents to a new location.
-    
-    Args:
-        source_path: Source directory path
-        dest_path: Destination directory path  
-        overwrite: Whether to overwrite existing destination
-        
-    Returns:
-        FileEditResult with operation status
-    """
-    try:
-        source = Path(source_path)
-        dest = Path(dest_path)
-        
-        if not source.exists():
-            return FileEditResult(
-                success=False,
-                message=f"Source directory {source_path} does not exist",
-                file_path=dest_path
-            )
-            
-        if dest.exists() and not overwrite:
-            return FileEditResult(
-                success=False, 
-                message=f"Destination {dest_path} already exists and overwrite=False",
-                file_path=dest_path
-            )
-            
-        if dest.exists() and overwrite:
-            shutil.rmtree(dest)
-            
-        shutil.copytree(source, dest)
-        
-        # Count copied files
-        file_count = sum(1 for _ in dest.rglob('*') if _.is_file())
-        
-        return FileEditResult(
-            success=True,
-            message=f"Successfully copied {file_count} files from {source_path} to {dest_path}",
-            changes_made=file_count,
-            file_path=dest_path
-        )
-        
-    except Exception as e:
-        return FileEditResult(
-            success=False,
-            message=f"Error copying directory: {str(e)}",
-            file_path=dest_path
-        )
-
-
-@tool
-def create_directory(dir_path: str) -> FileEditResult:
-    """
-    Create a directory and any necessary parent directories.
-    
-    Args:
-        dir_path: Directory path to create
-        
-    Returns:
-        FileEditResult with operation status  
-    """
-    try:
-        Path(dir_path).mkdir(parents=True, exist_ok=True)
-        
-        return FileEditResult(
-            success=True,
-            message=f"Successfully created directory {dir_path}",
-            changes_made=1,
-            file_path=dir_path
-        )
-        
-    except Exception as e:
-        return FileEditResult(
-            success=False,
-            message=f"Error creating directory: {str(e)}",
-            file_path=dir_path
-        )
-
-
-@tool
-def list_directory_contents(dir_path: str, show_hidden: bool = False) -> str:
-    """
-    List the contents of a directory.
-    
-    Args:
-        dir_path: Directory path to list
-        show_hidden: Whether to show hidden files
-        
-    Returns:
-        Directory listing as formatted string
-    """
-    try:
-        path = Path(dir_path)
-        if not path.exists():
-            return f"Directory {dir_path} does not exist"
-            
-        items = []
-        for item in path.iterdir():
-            if not show_hidden and item.name.startswith('.'):
-                continue
-                
-            item_type = "[DIR]" if item.is_dir() else "[FILE]"
-            size = ""
-            if item.is_file():
-                size = f" ({item.stat().st_size} bytes)"
-            items.append(f"{item_type} {item.name}{size}")
-            
-        return "\n".join(sorted(items)) if items else "Directory is empty"
-        
-    except Exception as e:
-        return f"Error listing directory: {str(e)}"
-
-
-@tool  
-def execute_shell_command(command: str, working_dir: str = ".") -> Dict[str, Any]:
-    """
-    Execute a shell command and return the result.
-    
-    Args:
-        command: Command to execute
-        working_dir: Working directory for command execution
-        
-    Returns:
-        Dictionary with command results
-    """
-    try:
-        result = subprocess.run(
-            command,
-            shell=True,
-            cwd=working_dir,
-            capture_output=True,
-            text=True,
-            timeout=30  # 30 second timeout
-        )
-        
-        return {
-            "success": result.returncode == 0,
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-            "return_code": result.returncode,
-            "command": command
-        }
-        
-    except subprocess.TimeoutExpired:
-        return {
-            "success": False,
-            "stdout": "",
-            "stderr": "Command timed out after 30 seconds",
-            "return_code": -1,
-            "command": command
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "stdout": "",
-            "stderr": f"Error executing command: {str(e)}",
-            "return_code": -1, 
-            "command": command
-        }
-
-
-# Export all tools for easy import
-CUSTOM_TOOLS = [
+# Export file tools
+FILE_TOOLS = [
     read_file_content,
     write_file_content,
-    smart_text_replace,
-    copy_directory,
-    create_directory,
-    list_directory_contents,
-    execute_shell_command
+    smart_text_replace
 ] 

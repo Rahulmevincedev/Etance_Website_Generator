@@ -97,13 +97,50 @@ class LangGraphAgent:
             return "You are an AI assistant. Use tools to help the user."
 
     async def _load_mcp_tools(self):
-        # Load MCP server config from mcp.json
+        # Load ONLY sequential thinking from MCP (reliable tool)
+        # Load custom tools directly for file operations (more reliable)
+        
         config_path = os.path.join(os.path.dirname(__file__), 'tools', 'mcp.json')
-        with open(config_path, 'r', encoding='utf-8') as f:
-            mcp_config = json.load(f)
-        mcp_servers = mcp_config.get('mcpServers', {})
-        client = MultiServerMCPClient(mcp_servers)
-        return await client.get_tools()
+        
+        # Load sequential thinking from MCP
+        mcp_tools = []
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                mcp_config = json.load(f)
+            
+            # Only load sequential thinking MCP server
+            sequential_thinking_config = {
+                "sequential-thinking": mcp_config.get('mcpServers', {}).get('sequential-thinking')
+            }
+            
+            if sequential_thinking_config["sequential-thinking"]:
+                from langchain_mcp_adapters.client import MultiServerMCPClient
+                client = MultiServerMCPClient(sequential_thinking_config)
+                mcp_tools = await client.get_tools()
+                logger.info(f"Loaded MCP sequential thinking tools: {[tool.name for tool in mcp_tools]}")
+            else:
+                logger.warning("Sequential thinking MCP server not found in config")
+                
+        except Exception as e:
+            logger.error(f"Error loading MCP tools: {e}")
+            # Continue with custom tools only if MCP fails
+        
+        # Load custom tools
+        custom_tools = []
+        try:
+            from .tools import CUSTOM_TOOLS
+            custom_tools = CUSTOM_TOOLS
+            logger.info(f"Loaded custom tools: {[tool.name for tool in custom_tools]}")
+        except Exception as e:
+            logger.error(f"Error loading custom tools: {e}")
+            
+        # Combine MCP sequential thinking + custom tools  
+        all_tools = mcp_tools + custom_tools
+        
+        if not all_tools:
+            logger.warning("No tools loaded! Agent will not be able to perform actions.")
+            
+        return all_tools
 
     def _create_graph(self):
         """Create the LangGraph workflow."""

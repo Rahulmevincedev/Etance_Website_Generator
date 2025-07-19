@@ -11,22 +11,13 @@ from datetime import datetime
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
-# Add DeepSeek import
-try:
-    from langchain_deepseek import ChatDeepSeek
-except ImportError:
-    ChatDeepSeek = None  # Handle missing package gracefully
 from langchain_core.tools import BaseTool
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 from langgraph.checkpoint.memory import MemorySaver
 
 from .state import AgentState, create_initial_state
-# Remove: from .tools import ALL_TOOLS
-# Add MCP imports
-from langchain_mcp_adapters.client import MultiServerMCPClient
-import asyncio
-import json
+from .tools import ALL_TOOLS
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -39,10 +30,10 @@ class LangGraphAgent:
     
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
-        temperature: float = 0.7,
+        model: str = "gpt-4o",
+        temperature: float = 0.1,
         max_iterations: int = 10,
-        tools: Optional[List[Any]] = None,
+        tools: Optional[List[BaseTool]] = None,
         system_prompt: Optional[str] = None,
         enable_tracing: bool = True
     ):
@@ -50,60 +41,53 @@ class LangGraphAgent:
         self.temperature = temperature
         self.max_iterations = max_iterations
         self.enable_tracing = enable_tracing
+        
+        # Initialize tools
+        self.tools = tools or ALL_TOOLS
+        
+        # Initialize LLM with tools
+        self.llm = ChatOpenAI(
+            model=model,
+            temperature=temperature
+        ).bind_tools(self.tools)
+        
+        # System prompt
         self.system_prompt = system_prompt or self._get_default_system_prompt()
-        if tools is None:
-            raise ValueError("Tools must be provided to __init__. Use LangGraphAgent.ainit for async tool loading.")
-        self.tools = tools
-        # Log loaded tool names
-        logger.info(f"Loaded MCP tools: {[tool.name for tool in self.tools]}")
-        # Dynamically append tool names and descriptions to system prompt
-        tool_info = [
-            f"{tool.name}: {getattr(tool, 'description', 'No description')}"
-            for tool in self.tools
-        ]
-        tool_info_str = "\n".join(tool_info)
-        self.system_prompt += (
-            f"\n\nYou have access to the following MCP tools:\n{tool_info_str}\n"
-            "When asked about your capabilities, list these tools and their descriptions."
-        )
-        # LLM selection logic
-        if model.lower().startswith("deepseek"):
-            if ChatDeepSeek is None:
-                raise ImportError("langchain-deepseek is not installed. Please install it to use DeepSeek models.")
-            self.llm = ChatDeepSeek(
-                model=model,
-                temperature=temperature
-            )
-            # Optionally bind tools if supported
-            if hasattr(self.llm, 'bind_tools'):
-                self.llm = self.llm.bind_tools(self.tools)
-        else:
-            self.llm = ChatOpenAI(
-                model=model,
-                temperature=temperature
-            ).bind_tools(self.tools)
+        
+        # Create the graph
         self.graph = self._create_graph()
+        
         logger.info(f"Initialized LangGraph Agent with model: {model}")
     
     def _get_default_system_prompt(self) -> str:
-        """Get the default system prompt for the agent from a file."""
-        prompt_path = os.path.join(os.path.dirname(__file__), 'prompt', 'system_prompt.txt')
-        try:
-            with open(prompt_path, 'r', encoding='utf-8') as f:
-                return f.read()
-        except Exception as e:
-            # Fallback to a minimal prompt if file is missing or unreadable
-            logger.warning(f"Could not load system prompt from {prompt_path}: {e}")
-            return "You are an AI assistant. Use tools to help the user."
+        """Get the default system prompt for the agent."""
+        return """You are an AI assistant powered by LangGraph and LangSmith. You help users with various tasks including:
 
-    async def _load_mcp_tools(self):
-        # Load MCP server config from mcp.json
-        config_path = os.path.join(os.path.dirname(__file__), 'tools', 'mcp.json')
-        with open(config_path, 'r', encoding='utf-8') as f:
-            mcp_config = json.load(f)
-        mcp_servers = mcp_config.get('mcpServers', {})
-        client = MultiServerMCPClient(mcp_servers)
-        return await client.get_tools()
+- File operations (reading, writing, editing files)
+- Shell command execution
+- Web browsing and information retrieval
+- System information and management
+- Code analysis and development
+- General problem-solving
+
+You have access to a comprehensive set of tools. Use them appropriately to help the user accomplish their goals.
+
+Key guidelines:
+- Be helpful, accurate, and thorough
+- Use tools when necessary to provide accurate information
+- Explain your reasoning and steps clearly
+- Handle errors gracefully and suggest alternatives
+- Maintain user context and preferences
+- Be proactive in suggesting useful next steps
+
+Current capabilities:
+- File system operations
+- Shell command execution (with safety checks)
+- Web content reading and downloading
+- System information gathering
+- Process management
+
+Always prioritize user safety and data security when using tools."""
 
     def _create_graph(self):
         """Create the LangGraph workflow."""
@@ -177,33 +161,15 @@ Current Context:
             # Update iteration count
             new_iteration = state.get("iteration_count", 0) + 1
             
-            # Track tool call results for better error handling
-            tool_results = []
-            if hasattr(response, 'tool_calls') and response.tool_calls:
-                for tool_call in response.tool_calls:
-                    tool_results.append({
-                        'tool_name': tool_call.get('name', 'unknown'),
-                        'attempted_at': datetime.now().isoformat(),
-                        'tool_call_id': tool_call.get('id')
-                    })
-            
             return {
                 "messages": [response],
-                "iteration_count": new_iteration,
-                "tool_results": tool_results
+                "iteration_count": new_iteration
             }
             
         except Exception as e:
             logger.error(f"Error in agent node: {e}")
             error_message = AIMessage(
-                content=f"""I encountered an error while processing your request: {str(e)}
-
-**Troubleshooting Tips:**
-1. If this is a file edit error, the issue might be with HTML formatting differences
-2. Try being more specific about the content to change
-3. Some edits may have succeeded partially - check the output files
-
-Please try again or rephrase your request."""
+                content=f"I encountered an error while processing your request: {str(e)}. Please try again or rephrase your request."
             )
             return {
                 "messages": [error_message],
@@ -266,22 +232,18 @@ Please try again or rephrase your request."""
             # Create configuration
             thread_id = thread_id or session_id or f"thread_{user_id}"
             config = RunnableConfig(configurable={"thread_id": thread_id})
-            # Add recursion_limit to config
-            config_dict = dict(config)
-            config_dict["recursion_limit"] = 100
             
             # Create input state
             input_state = create_initial_state(
                 user_id=user_id,
                 session_id=session_id,
                 user_name=user_name,
-                working_directory=working_directory,
-                available_tools=[tool.name for tool in self.tools]
+                working_directory=working_directory
             )
             input_state["messages"] = [HumanMessage(content=user_input)]
             
-            # Run the graph with increased recursion limit
-            result = await self.graph.ainvoke(input_state, config_dict)
+            # Run the graph
+            result = await self.graph.ainvoke(input_state, config)
             
             # Extract the final response
             messages = result.get("messages", [])
@@ -338,54 +300,3 @@ Please try again or rephrase your request."""
             "tracing_enabled": self.enable_tracing,
             "system_prompt_length": len(self.system_prompt)
         } 
-
-    @classmethod
-    async def ainit(
-        cls,
-        model: str = "gpt-3.5-turbo",
-        temperature: float = 0.7,
-        max_iterations: int = 10,
-        tools: Optional[List[Any]] = None,
-        system_prompt: Optional[str] = None,
-        enable_tracing: bool = True
-    ):
-        self = cls.__new__(cls)
-        self.model = model
-        self.temperature = temperature
-        self.max_iterations = max_iterations
-        self.enable_tracing = enable_tracing
-        self.system_prompt = system_prompt or self._get_default_system_prompt()
-        if tools is not None:
-            self.tools = tools
-        else:
-            self.tools = await self._load_mcp_tools()
-        # Log loaded tool names
-        logger.info(f"Loaded MCP tools: {[tool.name for tool in self.tools]}")
-        # Dynamically append tool names and descriptions to system prompt
-        tool_info = [
-            f"{tool.name}: {getattr(tool, 'description', 'No description')}"
-            for tool in self.tools
-        ]
-        tool_info_str = "\n".join(tool_info)
-        self.system_prompt += (
-            f"\n\nYou have access to the following MCP tools:\n{tool_info_str}\n"
-            "When asked about your capabilities, list these tools and their descriptions."
-        )
-        # LLM selection logic
-        if model.lower().startswith("deepseek"):
-            if ChatDeepSeek is None:
-                raise ImportError("langchain-deepseek is not installed. Please install it to use DeepSeek models.")
-            self.llm = ChatDeepSeek(
-                model=model,
-                temperature=temperature
-            )
-            if hasattr(self.llm, 'bind_tools'):
-                self.llm = self.llm.bind_tools(self.tools)
-        else:
-            self.llm = ChatOpenAI(
-                model=model,
-                temperature=temperature
-            ).bind_tools(self.tools)
-        self.graph = self._create_graph()
-        logger.info(f"Initialized LangGraph Agent with model: {model}")
-        return self 

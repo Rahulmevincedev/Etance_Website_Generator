@@ -7,14 +7,6 @@
         "@modelcontextprotocol/server-sequential-thinking"
       ],
       "transport": "stdio"
-    },
-      "desktopcommander": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "@wonderwhy-er/desktop-commander@latest"
-        ],
-        "transport": "stdio"
-      }
+    }
     }
   }

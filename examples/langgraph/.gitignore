@@ -11,11 +11,9 @@ Thumbs.db
 *.swp
 *.swo
 *~
-.cursorrules
 
 # Python cache
 langgraph_agent/__pycache__/
-langgraph_agent/tools/__pycache__/
 
 # OS generated files
 .DS_Store
@@ -26,6 +24,3 @@ langgraph_agent/tools/__pycache__/
 ehthumbs.db
 Thumbs.db 
 /templates/ 
-
-.env
-logs/
